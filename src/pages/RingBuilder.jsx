@@ -3,7 +3,7 @@ import React, { useState } from "react";
 export default function RingBuilder() {
     const [currentPage, setCurrentPage] = useState("builder");
     const [showSaveModal, setShowSaveModal] = useState(false);
-    const [openSection, setOpenSection] = useState("Metal Color"); // For Accordion
+    const [openSection, setOpenSection] = useState("Metal Color");
 
     // Ring configuration state
     const [ringConfig, setRingConfig] = useState({
@@ -14,31 +14,36 @@ export default function RingBuilder() {
         price: "$3,131"
     });
 
-    // Color Logic & Quality Enhancements
+    // Helper for key to force re-render animation
+    const ringKey = `${ringConfig.metal}-${ringConfig.diamond}`;
+
+    // Color Logic for Single Image
     const getRingStyle = () => {
-        let filter = "contrast(1.05) saturate(1.1) drop-shadow(0 25px 45px rgba(0,0,0,0.22))";
+        let filter = "contrast(1.05) saturate(1.1)";
 
         if (ringConfig.metal.includes("White") || ringConfig.metal.includes("Platinum")) {
-            filter = "grayscale(100%) brightness(1.15) contrast(1.1) drop-shadow(0 25px 45px rgba(0,0,0,0.22))";
+            // Silver Effect
+            filter = "grayscale(100%) brightness(1.1) contrast(1.1)";
         } else if (ringConfig.metal.includes("Rose")) {
-            filter = "sepia(0.5) hue-rotate(320deg) contrast(1.1) saturate(1.2) drop-shadow(0 25px 45px rgba(0,0,0,0.22))";
+            // Rose Gold Effect
+            filter = "sepia(0.5) hue-rotate(320deg) contrast(1.1) saturate(1.2)";
         }
 
         return {
-            maxWidth: "160px",
-            width: "100%",
+            width: "auto",
+            maxWidth: "280px", // Adjusted for new image
             height: "auto",
             filter: filter,
             imageRendering: "high-quality",
-            transform: "translateZ(0)",
-            animation: "float3D 6s ease-in-out infinite, shine 0.6s ease-out"
+            animation: "float3D 6s ease-in-out infinite"
         };
     };
 
-    const ringKey = `${ringConfig.metal}-${ringConfig.diamond}-${ringConfig.head}-${ringConfig.band}`;
+
+
 
     const getRingImage = () => {
-        return "/images/ring.png";
+        return "/images/ring_transparent.png";
     };
 
     const handleSave = () => {
@@ -79,7 +84,7 @@ export default function RingBuilder() {
 
                 {isOpen && (
                     <div style={{ paddingBottom: "24px", animation: "slideDown 0.3s ease-out" }}>
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "10px" }}>
                             {options.map(option => (
                                 <button
                                     key={option}
@@ -136,19 +141,79 @@ export default function RingBuilder() {
                     from { opacity: 0; transform: translateY(-10px); }
                     to { opacity: 1; transform: translateY(0); }
                 }
-                @keyframes shine {
-                    0% { filter: brightness(1) scale(1); }
-                    50% { filter: brightness(1.3) scale(1.02); }
-                    100% { filter: brightness(1) scale(1); }
-                }
                 @keyframes pulseRing {
                     0% { transform: rotateX(60deg) translateY(50px) scale(1); opacity: 0.8; }
                     50% { transform: rotateX(60deg) translateY(50px) scale(1.05); opacity: 1; }
                     100% { transform: rotateX(60deg) translateY(50px) scale(1); opacity: 0.8; }
                 }
+                
+                /* Responsive Styles */
+                .builder-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 400px;
+                    height: calc(100vh - 70px - 80px);
+                    overflow: hidden;
+                }
+                .ring-container {
+                    padding: 20px;
+                }
+                .options-panel {
+                    overflow-y: auto;
+                    height: 100%;
+                    padding: 0 32px 32px 32px;
+                }
+                .bottom-bar {
+                    padding: 0 40px;
+                    justify-content: flex-end;
+                    gap: 30px;
+                }
+
+                @media (max-width: 900px) {
+                    .builder-grid {
+                        grid-template-columns: 1fr; /* Stack vertically */
+                        height: auto; /* Allow Scroll */
+                        padding-bottom: 90px;
+                        overflow-y: visible; /* Ensure scroll works */
+                    }
+                    .ring-container {
+                        height: 350px; /* Slightly smaller height for mobile */
+                        background-color: #f9fafb;
+                    }
+                    .options-panel {
+                        border-left: none;
+                        border-top: 1px solid #e5e7eb;
+                        height: auto;
+                        padding: 10px 20px 32px 20px; /* Reduced side padding */
+                    }
+                     .bottom-bar {
+                        padding: 0 15px;
+                        gap: 10px;
+                        height: 70px; /* Compact bottom bar */
+                    }
+                    header {
+                        padding: 0 20px !important;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    /* Very small screens */
+                    .brand-name {
+                        font-size: 18px !important; /* Smaller logo text */
+                    }
+                    .bottom-bar {
+                       justify-content: space-between;
+                    }
+                    .bottom-bar .flex-col {
+                        display: none; /* Hide MSRP text on very small screens if needed, or scale it */
+                    }
+                     .bottom-bar .text-right {
+                        transform: scale(0.9);
+                        transform-origin: right center;
+                    }
+                }
             `}</style>
 
-            {/* HEADER - Price Removed */}
+            {/* HEADER */}
             <header style={{
                 backgroundColor: "#fff",
                 borderBottom: "1px solid #e5e7eb",
@@ -156,55 +221,47 @@ export default function RingBuilder() {
                 height: "70px",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "space-between"
+                justifyContent: "space-between",
+                position: "sticky",
+                top: 0,
+                zIndex: 50
             }}>
-                <div style={{ fontSize: "22px", fontWeight: "700", color: "#111827", display: "flex", alignItems: "center", gap: "10px" }}>
-                    <span>💎</span> Diamond Ring Builder
+                {/* 99 DIAMONDS LOGO RECREATION */}
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                    <div className="brand-name" style={{ fontFamily: "'Times New Roman', serif", fontSize: "24px", fontWeight: "700", color: "#111827", letterSpacing: "1.5px", position: "relative", lineHeight: "1" }}>
+                        99 DIAMONDS
+                        {/* Small Blue Diamond like reference */}
+                        <span style={{ fontSize: "14px", position: "absolute", top: "-5px", right: "-18px", filter: "hue-rotate(180deg)" }}>💎</span>
+                    </div>
+                    <div style={{ width: "100%", height: "1px", backgroundColor: "#c5a47e", margin: "4px 0" }}></div>
+                    <div style={{ fontFamily: "sans-serif", fontSize: "9px", letterSpacing: "4px", color: "#6b7280", marginLeft: "2px" }}>
+                        COPENHAGEN
+                    </div>
                 </div>
             </header>
 
             {/* MAIN CONTENT */}
-            <div style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 400px",
-                height: "calc(100vh - 70px - 80px)", // Subtract header and bottom bar
-                overflow: "hidden"
-            }}>
-                {/* LEFT SIDE - 3D RING DISPLAY */}
-                <div style={{
-                    backgroundColor: "#f9fafb",
+            <div className="builder-grid">
+                {/* LEFT SIDE - DISPLAY */}
+                <div className="ring-container" style={{
+                    background: "radial-gradient(circle at center, #ffffff 0%, #e5e7eb 100%)", // Studio Gradient Background
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     position: "relative",
-                    perspective: "1000px",
                     height: "100%",
                     overflow: "hidden"
                 }}>
-                    {/* 3D Circle Platform */}
+                    {/* Ring Image Only - No platform */}
                     <div style={{
-                        position: "absolute",
-                        width: "260px",
-                        height: "260px",
-                        borderRadius: "50%",
-                        background: "radial-gradient(circle, rgba(99,102,241,0.08) 0%, rgba(99,102,241,0) 70%)",
-                        border: "1px solid rgba(99,102,241,0.1)",
-                        transform: "rotateX(60deg) translateY(50px)",
-                        boxShadow: "0 20px 50px rgba(0,0,0,0.05)",
-                        animation: "pulseRing 4s ease-in-out infinite"
-                    }} />
-
-                    {/* Ring Image */}
-                    <div style={{
-                        marginTop: "-20px",
+                        width: "100%",
+                        height: "100%",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        width: "100%",
-                        height: "100%",
                         zIndex: 10
                     }}>
-                        <img
+                        <ZoomableRing
                             key={ringKey}
                             src={getRingImage()}
                             alt="Custom Ring"
@@ -214,12 +271,7 @@ export default function RingBuilder() {
                 </div>
 
                 {/* RIGHT SIDE - ACCORDION OPTIONS */}
-                <div style={{
-                    backgroundColor: "#fff",
-                    borderLeft: "1px solid #e5e7eb",
-                    overflowY: "auto",
-                    padding: "0 32px 32px 32px"
-                }}>
+                <div className="options-panel" style={{ backgroundColor: "#fff" }}>
                     <div style={{ paddingTop: "32px", paddingBottom: "20px" }}>
                         <h2 style={{ fontSize: "24px", fontWeight: "700", marginBottom: "8px" }}>Customize Ring</h2>
                         <p style={{ color: "#6b7280" }}>Select your options below</p>
@@ -252,11 +304,14 @@ export default function RingBuilder() {
                         options={["Plain", "Pavé", "Channel", "Twisted"]}
                         currentSelection={ringConfig.band}
                     />
+
+                    {/* Spacer for bottom bar visibility on mobile */}
+                    <div style={{ height: "40px" }}></div>
                 </div>
             </div>
 
             {/* NEW BOTTOM BAR */}
-            <div style={{
+            <div className="bottom-bar" style={{
                 position: "fixed",
                 bottom: 0,
                 left: 0,
@@ -265,14 +320,11 @@ export default function RingBuilder() {
                 backgroundColor: "#31364a",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "flex-end",
-                padding: "0 40px",
-                gap: "30px",
                 boxShadow: "0 -4px 20px rgba(0,0,0,0.1)",
                 zIndex: 100
             }}>
                 {/* Price Section */}
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", color: "#fff" }}>
+                <div className="text-right flex flex-col items-end text-white mr-auto">
                     <div style={{ fontSize: "18px", fontWeight: "700" }}>
                         MSRP {ringConfig.price}
                     </div>
@@ -318,7 +370,7 @@ export default function RingBuilder() {
                     onMouseOver={(e) => e.target.style.backgroundColor = "#f3f4f6"}
                     onMouseOut={(e) => e.target.style.backgroundColor = "#fff"}
                 >
-                    Next: Email Enquiry
+                    Next
                 </button>
             </div>
 
@@ -328,9 +380,10 @@ export default function RingBuilder() {
                 <div style={{
                     position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
                     backgroundColor: "rgba(0,0,0,0.6)", zIndex: 1000,
-                    display: "flex", alignItems: "center", justifyContent: "center"
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    padding: "20px"
                 }}>
-                    <div style={{ backgroundColor: "#fff", padding: "40px", borderRadius: "16px", width: "90%", maxWidth: "500px", textAlign: "center", position: "relative" }}>
+                    <div style={{ backgroundColor: "#fff", padding: "40px", borderRadius: "16px", width: "100%", maxWidth: "500px", textAlign: "center", position: "relative" }}>
                         <button onClick={() => setShowSaveModal(false)} style={{ position: "absolute", top: "16px", right: "16px", border: "none", background: "none", fontSize: "20px", cursor: "pointer" }}>×</button>
                         <div style={{ fontSize: "50px", marginBottom: "20px" }}>💎</div>
                         <h2 style={{ fontSize: "24px", marginBottom: "10px" }}>Design Saved!</h2>
@@ -365,10 +418,11 @@ function EmailPage({ ringConfig, ringImage, onBack }) {
                 justifyContent: "center",
                 flexDirection: "column",
                 gap: "24px",
-                animation: "slideDown 0.5s ease-out"
+                animation: "slideDown 0.5s ease-out",
+                padding: "20px"
             }}>
                 <div style={{ fontSize: "60px", marginBottom: "10px" }}>✅</div>
-                <h1 style={{ fontSize: "32px", fontWeight: "700", color: "#111827" }}>Request Sent!</h1>
+                <h1 style={{ fontSize: "32px", fontWeight: "700", color: "#111827", textAlign: "center" }}>Request Sent!</h1>
                 <p style={{ fontSize: "16px", color: "#6b7280", textAlign: "center", maxWidth: "400px" }}>
                     Thank you, {formData.name}. We have received your custom ring design request and will be in touch shortly.
                 </p>
@@ -385,8 +439,6 @@ function EmailPage({ ringConfig, ringImage, onBack }) {
                         cursor: "pointer",
                         transition: "transform 0.2s"
                     }}
-                    onMouseOver={e => e.target.style.transform = "scale(1.05)"}
-                    onMouseOut={e => e.target.style.transform = "scale(1)"}
                 >
                     Back to Collection
                 </button>
@@ -403,19 +455,34 @@ function EmailPage({ ringConfig, ringImage, onBack }) {
             justifyContent: "center",
             padding: "40px 20px"
         }}>
-            <div style={{
+            <style>{`
+                .email-card-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1.2fr;
+                }
+                @media (max-width: 900px) {
+                    .email-card-grid {
+                        grid-template-columns: 1fr;
+                    }
+                    .summary-section {
+                        padding: 40px !important;
+                    }
+                    .form-section {
+                        padding: 40px 20px !important;
+                    }
+                }
+            `}</style>
+            <div className="email-card-grid" style={{
                 maxWidth: "1100px",
                 width: "100%",
                 backgroundColor: "#fff",
                 borderRadius: "24px",
                 boxShadow: "0 20px 50px rgba(0,0,0,0.08)",
-                overflow: "hidden",
-                display: "grid",
-                gridTemplateColumns: "1fr 1.2fr"
+                overflow: "hidden"
             }}>
 
                 {/* LEFT SIDE - SUMMARY CARD */}
-                <div style={{
+                <div className="summary-section" style={{
                     backgroundColor: "#1f2937",
                     color: "#fff",
                     padding: "60px",
@@ -444,7 +511,7 @@ function EmailPage({ ringConfig, ringImage, onBack }) {
                             src={ringImage}
                             alt="Ring"
                             style={{
-                                width: "180px",
+                                width: "160px",
                                 filter: "drop-shadow(0 20px 30px rgba(0,0,0,0.5))",
                                 animation: "float3D 6s ease-in-out infinite"
                             }}
@@ -477,14 +544,14 @@ function EmailPage({ ringConfig, ringImage, onBack }) {
                 </div>
 
                 {/* RIGHT SIDE - FORM */}
-                <div style={{ padding: "60px" }}>
+                <div className="form-section" style={{ padding: "60px" }}>
                     <h2 style={{ fontSize: "28px", fontWeight: "800", color: "#111827", marginBottom: "10px" }}>Finalize Request</h2>
                     <p style={{ color: "#6b7280", marginBottom: "40px", lineHeight: "1.6" }}>
                         Send this design to our jewelry experts. We will confirm availability and schedule a viewing.
                     </p>
 
                     <form onSubmit={handleSubmit} style={{ display: "grid", gap: "24px" }}>
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "20px" }}>
                             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                                 <label style={{ fontSize: "13px", fontWeight: "600", color: "#374151", textTransform: "uppercase", letterSpacing: "0.5px" }}>Full Name</label>
                                 <input
@@ -552,6 +619,70 @@ function EmailPage({ ringConfig, ringImage, onBack }) {
                         </button>
                     </form>
                 </div>
+            </div>
+        </div>
+    );
+}
+
+// ZOOMABLE RING COMPONENT
+function ZoomableRing({ src, alt, style }) {
+    const [scale, setScale] = useState(1);
+    const containerRef = React.useRef(null);
+
+    React.useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        const onWheel = (e) => {
+            e.preventDefault();
+            // Determine delta: Normalize for different browsers/devices
+            // For trackpad, deltaY is usually small. For mouse, 100.
+            const delta = -e.deltaY * 0.002;
+
+            setScale(prev => {
+                const newScale = prev + delta;
+                return Math.min(Math.max(0.5, newScale), 4); // Clamp between 0.5x and 4x
+            });
+        };
+
+        // Add passive: false to allow preventDefault (stops page scroll)
+        container.addEventListener('wheel', onWheel, { passive: false });
+
+        return () => {
+            container.removeEventListener('wheel', onWheel);
+        };
+    }, []);
+
+    // Extract animation to apply to wrapper, keep other styles for image
+    const { animation, ...imgStyle } = style || {};
+
+    return (
+        <div
+            style={{
+                animation: animation, // Floating animation on wrapper
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "zoom-in",
+                width: "100%",
+                height: "100%",
+                overflow: "hidden"
+            }}
+        >
+            <div
+                ref={containerRef}
+                style={{
+                    transform: `scale(${scale})`,
+                    transition: "transform 0.05s ease-out", // Smooth zoom
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "100%",
+                    height: "100%",
+                    transformOrigin: "center center"
+                }}
+            >
+                <img src={src} alt={alt} style={{ ...imgStyle, pointerEvents: "none" }} />
             </div>
         </div>
     );
