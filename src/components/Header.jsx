@@ -7,9 +7,9 @@ export default function Header() {
                 <div className="h-[74px] flex items-center justify-between">
                     {/* LEFT LOGO */}
                     <div className="flex items-center gap-2">
-                        <span className="text-[26px] font-medium text-gray-800">
+                        {/* <span className="text-[26px] font-medium text-gray-800">
                             StoneAlgo
-                        </span>
+                        </span> */}
 
                         <span className="text-[11px] font-semibold px-2 py-[2px] rounded-md bg-indigo-100 text-indigo-700">
                             PRO
